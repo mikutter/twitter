@@ -5,8 +5,9 @@ require 'twitter-text'
 module Plugin::Twitter; end
 
 require_relative 'builder'
-require_relative 'model'
 require_relative 'mikutwitter'
+require_relative 'model'
+require_relative 'service'
 
 Plugin.create(:twitter) do
 
