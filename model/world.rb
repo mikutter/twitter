@@ -20,8 +20,8 @@ module Plugin::Twitter
     def twitter
       @twitter ||= MikuTwitter.new.tap do |ﾋｳｨｯﾋﾋｰ|
         ck, cs = Plugin.filtering(:twitter_default_api_keys, nil, nil)
-        ﾋｳｨｯﾋﾋｰ.consumer_key = ck || Environment::TWITTER_CONSUMER_KEY
-        ﾋｳｨｯﾋﾋｰ.consumer_secret = cs || Environment::TWITTER_CONSUMER_SECRET
+        ﾋｳｨｯﾋﾋｰ.consumer_key = ck
+        ﾋｳｨｯﾋﾋｰ.consumer_secret = cs
         ﾋｳｨｯﾋﾋｰ.a_token = token
         ﾋｳｨｯﾋﾋｰ.a_secret = secret
       end
