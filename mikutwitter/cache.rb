@@ -7,12 +7,12 @@ require 'digest/md5'
 module MikuTwitter::Cache
   CACHE_EXPIRE = 60 * 60 * 24 * 2
 
-  def cache(api, url, options, method)
+  def cache(api, url, options, method, &proc)
     if :get == method and options[:cache]
       if(:keep == options[:cache])
-        _cache_keep(api, url, options, method, &Proc.new)
+        _cache_keep(api, url, options, method, &proc)
       else
-        _cache_get(api, url, options, method, &Proc.new) end
+        _cache_get(api, url, options, method, &proc) end
     else
       yield end end
 
