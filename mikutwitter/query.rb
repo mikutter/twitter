@@ -24,10 +24,10 @@ module MikuTwitter::Query
     super(*a, &b) end
 
   # 同じURLに対して同時にリクエストを送らないように、APIのURL毎にユニークなロックを取得する
-  def self.api_lock(url)
+  def self.api_lock(url, &proc)
     result = Lock.synchronize{
       @url_lock ||= Hash.new{ |h, k| h[k] = Monitor.new }
-      @url_lock[url] }.synchronize(&Proc.new)
+      @url_lock[url] }.synchronize(&proc)
     @url_lock.delete(url)
     result end
 
