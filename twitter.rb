@@ -22,22 +22,6 @@ Plugin.create(:twitter) do
   favorites = Hash.new{ |h, k| h[k] = Set.new } # {user_id: set(message_id)}
   unfavorites = Hash.new{ |h, k| h[k] = Set.new } # {user_id: set(message_id)}
 
-  @twitter_configuration = JSON.parse(file_get_contents(File.join(__dir__, 'configuration.json'.freeze)), symbolize_names: true)
-
-  # Twitter API help/configuration.json を叩いて最新情報を取得する
-  Delayer.new do
-    twitter = Enumerator.new{|y|
-      Plugin.filtering(:worlds, y)
-    }.find{|world|
-      world.class.slug == :twitter
-    }
-    if twitter
-      (twitter/:help/:configuration).json(cache: true).next do |configuration|
-        @twitter_configuration = configuration.symbolize
-      end
-    end
-  end
-
   # Serviceと、Messageの配列を受け取り、一度以上受け取ったことのあるものを除外して返すフィルタを作成して返す。
   # ただし、除外したかどうかはService毎に記録する。
   # また、アカウント登録前等、serviceがnilの時はシステムメッセージ以外を全て削除し、記録しない。
@@ -75,11 +59,14 @@ Plugin.create(:twitter) do
   # ==== Return
   # Fixnum URLの長さ
   def posted_url_length(url)
-    if url.start_with?('https://'.freeze)
-      @twitter_configuration[:short_url_length_https] || 23
-    else
-      @twitter_configuration[:short_url_length] || 22
-    end
+    # 墓標
+    #  https://developer.twitter.com/en/docs/twitter-api/v1/developer-utilities/configuration/api-reference/get-help-configuration
+    #  "The GET help/configuration endpoint was retired on June 29th, 2021."
+    # 短縮URLの長さを22で始めたらあっという間に足りなくなってすぐに
+    # 23に変更するはめになったという反省を踏まえてconfigurableにしたけど
+    # 結局再び変更されることはないまま廃止に至ったというTwitterさんの黒歴史
+    # として記録しておきたい
+    23
   end
 
   filter_update(&gen_message_filter_with_service)
