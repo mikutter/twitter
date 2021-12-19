@@ -46,7 +46,7 @@ module Plugin::Twitter
       user_obj.title
     end
 
-    def to_hash
+    def to_h
       super.merge(user: {id: user_obj.id,
                          idname: user_obj.idname,
                          name: user_obj.name,

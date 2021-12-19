@@ -13,7 +13,7 @@ module MikuTwitter::APIShortcuts
       define_method(method_name, &yield(api, parser))
     else
       define_method(method_name){ |args = {}|
-        args = args.to_hash
+        args = args.to_h
         key_convert.each{ |src, dst|
           args[dst] = args[src] if args.has_key?(src) }
         (self/api).__send__(parser, defaults.merge(args)) } end end

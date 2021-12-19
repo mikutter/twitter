@@ -168,7 +168,7 @@ module MikuTwitter::ApiCallSupport
         # ユーザの見た目が変わっても過去のTweetのアイコン等はそのままにしたいので、新しいUserを作る
         existing_user = Plugin::Twitter::User.findbyid(u[:id].to_i, Diva::DataSource::USE_LOCAL_ONLY)
         if visually_changed?(existing_user, cnv)
-          Plugin::Twitter::User.new(existing_user.to_hash).merge(cnv)
+          Plugin::Twitter::User.new(existing_user.to_h).merge(cnv)
         else
           cnv[:exact] ? Plugin::Twitter::User.rewind(cnv) : Plugin::Twitter::User.new_ifnecessary(cnv) end end
 
