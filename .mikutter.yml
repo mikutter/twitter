@@ -3,12 +3,12 @@
 :slug: twitter
 :description: mikutterにTwitter連携機能を追加するプラグインです。
 :depends:
-  :mikutter: '3.6'
+  :mikutter: '5.0'
   :plugin:
   - score
   - skin
   - spell
   - twitter_api_keys
   - world
-:version: '1.2'
+:version: '2.0'
 :author: toshi_a
