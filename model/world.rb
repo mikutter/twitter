@@ -207,7 +207,6 @@ module Plugin::Twitter
     private
 
     def user_initialize
-      notice 'Plugin::Twitter::World#user_initialize'
       if self[:user]
         self[:user] = Plugin::Twitter::User.new_ifnecessary(self[:user])
         run_once(self[:user]) { (twitter/:account/:verify_credentials).user }
@@ -225,7 +224,6 @@ module Plugin::Twitter
     end
 
     def user_data_received(user)
-      notice 'Plugin::Twitter::World#user_data_received'
       # user_initializeはrun_onceでUser ID毎に結果がキャッシュされ、起動後2回目以降の正常系では同じオブジェクトがここに来る。
       # その時は処理がループしてしまうので、Worldを更新しない。
       unless self[:user].equal?(user)
@@ -235,7 +233,6 @@ module Plugin::Twitter
     end
 
     def user_data_failed(exception)
-      notice 'Plugin::Twitter::World#user_data_failed'
       case exception
       when MikuTwitter::Error
         if not UserConfig[:verify_credentials]
