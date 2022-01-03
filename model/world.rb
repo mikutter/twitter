@@ -209,7 +209,10 @@ module Plugin::Twitter
     def user_initialize
       if self[:user]
         self[:user] = Plugin::Twitter::User.new_ifnecessary(self[:user])
-        (twitter/:account/:verify_credentials).user.next(&method(:user_data_received)).trap(&method(:user_data_failed)).terminate
+        run_once(self[:user]) { (twitter/:account/:verify_credentials).user }
+          .next(&method(:user_data_received))
+          .trap(&method(:user_data_failed))
+          .terminate
       else
         res = twitter.query!('account/verify_credentials', cache: true)
         if "200" == res.code
@@ -221,8 +224,12 @@ module Plugin::Twitter
     end
 
     def user_data_received(user)
-      self[:user] = user
-      Plugin.call(:world_modify, self)
+      # user_initializeはrun_onceでUser ID毎に結果がキャッシュされ、起動後2回目以降の正常系では同じオブジェクトがここに来る。
+      # その時は処理がループしてしまうので、Worldを更新しない。
+      unless self[:user].equal?(user)
+        self[:user] = user
+        Plugin.call(:world_modify, self)
+      end
     end
 
     def user_data_failed(exception)
@@ -247,6 +254,19 @@ module Plugin::Twitter
                         "Twitterサーバの情況を調べる→ https://dev.twitter.com/status\n"+
                         "Twitterサーバの情況を調べたくない→ http://ex.nicovideo.jp/vocaloid\n\n--\n\n" +
                         "#{res.code} #{res.body}"
+      end
+    end
+
+    # userごとに一度だけブロックを評価し、deferredを返す。
+    # 2回目以降はブロックの評価はせず、最初の呼び出しと実行結果を共有するdeferredを生成して返す。
+    def run_once(user, &block)
+      @@run_once_mutex ||= Mutex.new
+      @@run_once_deferred_by_userid ||= {}
+      @@run_once_mutex.synchronize do
+        trunk = @@run_once_deferred_by_userid[user.id] || block.call
+        branch = @@run_once_deferred_by_userid[user.id] = Delayer::Deferred.new(true)
+        trunk.next { |v| branch.call(v); v }
+          .trap { |v| branch.fail(v); Delayer::Deferred.fail(v) }
       end
     end
   end
